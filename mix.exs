@@ -34,7 +34,8 @@ defmodule PolymorphicEmbed.MixProject do
         "coveralls.detail": :test,
         "coveralls.post": :test,
         "coveralls.html": :test,
-        "coveralls.github": :test
+        "coveralls.github": :test,
+        "test.watch": :test
       ]
     ]
   end
@@ -47,19 +48,21 @@ defmodule PolymorphicEmbed.MixProject do
 
   defp deps do
     [
-      {:ecto, "~> 3.9"},
+      {:ecto, "~> 3.10"},
       {:jason, "~> 1.4"},
-      {:phoenix_html, "~> 2.14 or ~> 3.2", optional: true},
-      {:ex_doc, "~> 0.28", only: :dev},
-      {:ecto_sql, "~> 3.9", only: :test},
-      {:postgrex, "~> 0.16", only: :test},
+      {:phoenix_html, "~> 2.14 or ~> 3.3", optional: true},
+      {:ex_doc, "~> 0.30", only: :dev},
+      {:ecto_sql, "~> 3.10", only: :test},
+      {:postgrex, "~> 0.17", only: :test},
       {:query_builder, "~> 1.0", only: :test},
       {:phoenix_ecto, "~> 4.4", only: :test},
-      {:phoenix_live_view, "~> 0.18", only: :test},
-      {:floki, "~> 0.33", only: :test},
+      {:phoenix_live_view, "~> 0.20", only: :test},
+      {:floki, "~> 0.35", only: :test},
       {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false},
       {:excoveralls, "~> 0.15", only: :test},
-      {:credo, "~> 1.6", only: [:dev, :test], runtime: false}
+      {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
+      {:mix_test_watch, "~> 1.0", only: [:test], runtime: false}
+
     ]
   end
 
