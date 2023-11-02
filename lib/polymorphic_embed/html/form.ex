@@ -14,9 +14,60 @@ if Code.ensure_loaded?(Phoenix.HTML) && Code.ensure_loaded?(Phoenix.HTML.Form) d
         %_{} = value ->
           PolymorphicEmbed.get_polymorphic_type(schema, field, value)
 
-        _ ->
-          nil
+        _ -> nil
       end
+    end
+
+    def get_polymorphic_type(form, schema, field, value) do
+      case value do
+        %Ecto.Changeset{data: value} ->
+          PolymorphicEmbed.get_polymorphic_type(schema, field, value)
+        %_{} = value ->
+          PolymorphicEmbed.get_polymorphic_type(schema, field, value)
+        _ -> nil
+      end
+    end
+
+    def polymorphic_embed_inputs_for_many(form, field) do
+      options = Keyword.take(form.options, [:multipart])
+      items = Ecto.Changeset.get_field(form.source, field)
+      items |> Enum.with_index() |> Enum.map(fn {item, index} ->
+        %schema{} = form.source.data
+        type = get_polymorphic_type(form, schema, field, item)
+        params = Map.get(form.source.params || %{}, to_string(field), %{})
+        parent_action = form.action
+
+        changeset =
+          item
+          |> Ecto.Changeset.change()
+          |> apply_action(parent_action)
+
+        errors = get_errors(changeset)
+
+        changeset = %Ecto.Changeset{
+          changeset
+        | action: parent_action,
+          params: %{},
+          errors: errors,
+          valid?: errors == []
+        }
+
+        id = to_string(form.id <> "_#{field}")
+        name = to_string(form.name <> "[#{field}]")
+
+        %Phoenix.HTML.Form{
+          source: changeset,
+          impl: Phoenix.HTML.FormData.Ecto.Changeset,
+          id: id,
+          index: index,
+          name:  "#{name}[#{index}]",
+          errors: errors,
+          data: item,
+          params: params,
+          hidden: [__type__: to_string(type)],
+          options: options
+        }
+      end)
     end
 
     @doc """
@@ -146,7 +197,7 @@ if Code.ensure_loaded?(Phoenix.HTML) && Code.ensure_loaded?(Phoenix.HTML.Form) d
           impl: Phoenix.HTML.FormData.Ecto.Changeset,
           id: id,
           index: if(length(list_data) > 1, do: i),
-          name: name,
+          name: if(length(list_data) > 1, do: "#{name}[]", else: name),
           errors: errors,
           data: data,
           params: params,

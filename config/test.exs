@@ -1,6 +1,6 @@
 import Config
 
-config :logger, level: :warn
+config :logger, level: :warning
 
 config :phoenix, :json_library, Jason
 
@@ -11,6 +11,6 @@ config :polymorphic_embed, PolymorphicEmbed.Repo,
   username: "postgres",
   password: "postgres",
   database: "polymorphic_embed",
-  hostname: "localhost",
+  hostname: "127.0.0.1",
   pool: Ecto.Adapters.SQL.Sandbox,
   priv: "test/support"

@@ -2023,6 +2023,43 @@ defmodule PolymorphicEmbedTest do
       end)
     end
 
+    test "with polymorphic_embed_many renders field names as array" do
+      reminder_module = get_module(Reminder, :polymorphic)
+
+      reminder_attrs = %{
+        text: "This is an SMS reminder",
+        date: "2020-05-28 02:57:19Z",
+        contexts: [
+          %{
+            __type__: "device",
+            type: "phone",
+            ref: "unavailable"
+          },
+          %{
+            __type__: "age",
+            age: "9"
+          }
+        ]
+      }
+
+      changeset =
+        reminder_module
+        |> struct()
+        |> reminder_module.changeset(reminder_attrs)
+
+      changeset = %{changeset | action: :insert}
+
+      safe_form_for(changeset, fn f ->
+        assert f.errors == []
+        for embed_form <- polymorphic_embed_inputs_for_many(f, :contexts) do
+          assert embed_form.name == "reminder[contexts][#{embed_form.index}]"
+          assert Keyword.get(embed_form.hidden, :__type__) != ""
+          assert Keyword.get(embed_form.hidden, :__type__) |> (&(Enum.member?(["device", "age"], &1))).()
+          "from safe_inputs_for"
+        end
+      end)
+    end
+
     test "keep changes in embeds_one (nested into a polymorphic embed) when invalid changeset" do
       for generator <- @generators do
         reminder_module = get_module(Reminder, generator)

@@ -142,6 +142,14 @@ defmodule PolymorphicEmbed do
 
       {:ok, params_for_field} ->
         cond do
+          array? and is_map(params_for_field) ->
+            params_for_field = Map.values(params_for_field)
+            cast_polymorphic_embeds_many(
+              changeset,
+              field,
+              changeset_fun,
+              params_for_field,
+              field_options)
           array? and is_list(params_for_field) ->
             cast_polymorphic_embeds_many(
               changeset,
@@ -150,7 +158,6 @@ defmodule PolymorphicEmbed do
               params_for_field,
               field_options
             )
-
           not array? and is_map(params_for_field) ->
             cast_polymorphic_embeds_one(
               changeset,
